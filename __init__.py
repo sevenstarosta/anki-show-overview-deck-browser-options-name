@@ -35,6 +35,12 @@ def reorder_table_columns(html_content: str) -> str:
                     # Move the last header cell (Options) to the first position
                     options_header = header_cells[-1]
                     options_header_copy = options_header.extract()
+
+                    # Add title "Preset" to the options header with right alignment and padding
+                    options_header_copy.string = "Preset"
+                    options_header_copy['align'] = 'right'
+                    options_header_copy['style'] = 'text-align: right; padding: 4px 12px;'
+
                     header_row.insert(0, options_header_copy)
 
             # Process data rows (skip header row)
