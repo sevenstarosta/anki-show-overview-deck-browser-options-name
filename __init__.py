@@ -5,6 +5,9 @@ from aqt import gui_hooks
 
 
 def replace_deck_node_options(deck_id: int, options_name: str, tree: str) -> str:
+    """
+    Function to search the overview screen's HTML for the options cog and replace it with a span with the options name.
+    """
     # More flexible pattern that works after reordering
     pattern = re.compile(
         re.escape('onclick=\'return pycmd("opts:') + str(deck_id) +
@@ -48,9 +51,6 @@ def reorder_table_columns(html_content: str) -> str:
                 cells = row.find_all(['td', 'th'])
 
                 if len(cells) < 4:
-                    continue
-
-                if len(cells) == 1:
                     continue
 
                 # Move last cell to first position

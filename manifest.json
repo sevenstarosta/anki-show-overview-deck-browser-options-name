@@ -3,6 +3,6 @@
     "name": "Show Deck Options Name in Browser",
     "author": "sevenstarosta",
     "homepage": "https://github.com/sevenstarosta/anki-show-overview-deck-browser-options-name",
-    "tags": ["deck", "browser", "options"],
+    "tags": ["deck", "browser", "options", "preset"],
     "description": "Shows on the homepage which option set a deck is currently configured with, including filtered deck search terms."
 }
