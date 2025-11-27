@@ -1,13 +1,12 @@
 # anki-show-overview-deck-browser-name
-[Anki Desktop](https://apps.ankiweb.net/) addon to show for each deck on the overview screen on the overview screen which preset (options) the deck is configured with. [AnkiWeb Addon page / installation](https://ankiweb.net/shared/info/74888615).
+[Anki Desktop](https://apps.ankiweb.net/) addon to show for each deck on the overview screen on the overview screen which preset (options) the deck is configured with. [AnkiWeb Addon page / installation](https://ankiweb.net/shared/info/684236185).
 
 #### Building
-To build a copy locally for uploading to ankiweb, run:
+To build a zip `show-overview-deck-browser-options-name.ankiaddon` locally for uploading a to [AnkiWeb](https://ankiweb.net/shared/info/684236185), run:
 ```
 chmod +x build.sh
 ./build.sh
 ```
-Then upload the file generated on your desktop.
 
 ## Acknowledgements
 
