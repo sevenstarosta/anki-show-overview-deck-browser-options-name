@@ -81,16 +81,16 @@ def replace_home_decks_options_buttons(browser, content) -> None:
         # Check if it's a filtered deck
         if deck_config.get("dyn") == 1:
             # For filtered decks, get the search terms
-            terms = deck_config.get("terms", [])
-            if terms and len(terms) > 0:
-                options_name = terms[0][0]  # First term's search string
+            if (terms:= deck_config.get("terms", [])):
+                options_name = f"Filtered: {terms[0][0]}"  # First term's search string
+                if len(options_name) > 60:
+                    # Limit filtered deck's displayed preset name to 60 chars of search string
+                    options_name = f"{options_name[:45]}... (truncated)"
             else:
-                continue
+                options_name = "Filtered Deck"
         else:
             # For regular decks, get the options name
-            options_name = deck_config.get("name")
-            if not options_name:
-                continue
+            options_name = deck_config.get("name") or "Missing Deck Preset"
 
         content.tree = replace_deck_node_options(
             deck_id=deck_id,
