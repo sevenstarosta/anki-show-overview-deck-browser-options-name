@@ -1,8 +1,61 @@
 import re
 from bs4 import BeautifulSoup
 
-from aqt import gui_hooks
+from aqt import gui_hooks, mw
 
+############################################################################
+############################### START CONFIG ###############################
+############################################################################
+
+DEFAULT_COLUMN = 100 # Large number - puts preset column last
+DEFAULT_DISPLAY_COG = True
+DEFAULT_PRESET_STYLING = "text-align: left; display: block; max-width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;"
+DEFAULT_PRESET_HEADER_ALIGN = "left"
+DEFAULT_PRESET_HEADER_STYLE = "text-align: left; padding: 4px 12px;"
+DEFAULT_PRESET_HEADER_TITLE = "Preset"
+
+# Configurable variables
+column_number = DEFAULT_COLUMN
+display_cog = DEFAULT_DISPLAY_COG
+styling = DEFAULT_PRESET_STYLING
+preset_header_align = DEFAULT_PRESET_HEADER_ALIGN
+preset_header_style = DEFAULT_PRESET_HEADER_STYLE
+preset_header_title = DEFAULT_PRESET_HEADER_TITLE
+
+# Allow user config to specify max preset name display length, ordering of columns, and whether or not to display a cog
+try:
+    config: dict = mw.addonManager.getConfig(__name__)
+    column_number = config.get("presetColumnNumber")
+    display_cog = config.get("displayPresetCog")
+    styling = config.get("presetStyle")
+    preset_header_align = config.get("presetHeaderAlign")
+    preset_header_style = config.get("presetHeaderStyle")
+    preset_header_title = config.get("presetHeaderTitle")
+except:
+    pass
+
+if not isinstance(column_number, int):
+    # Put preset as the first column if not provided
+    column_number = DEFAULT_COLUMN
+
+if not isinstance(display_cog, bool):
+    display_cog = DEFAULT_DISPLAY_COG
+
+if not isinstance(styling, str):
+    styling = DEFAULT_PRESET_STYLING
+
+if not isinstance(preset_header_align, str):
+    preset_header_align = DEFAULT_PRESET_HEADER_ALIGN
+
+if not isinstance(preset_header_style, str):
+    preset_header_style = DEFAULT_PRESET_HEADER_STYLE
+
+if not isinstance(preset_header_title, str) or not preset_header_title:
+    preset_header_title = DEFAULT_PRESET_HEADER_TITLE
+
+############################################################################
+################################ END CONFIG ################################
+############################################################################
 
 def replace_deck_node_options(deck_id: int, options_name: str, tree: str) -> str:
     """
@@ -13,8 +66,8 @@ def replace_deck_node_options(deck_id: int, options_name: str, tree: str) -> str
         re.escape('onclick=\'return pycmd("opts:') + str(deck_id) +
         re.escape('");\'><img src=\'/_anki/imgs/gears.svg\' class=gears>')
     )
-    # Replace with just the options name, right-aligned
-    replacement = f'onclick=\'return pycmd("opts:{deck_id}");\'><span style="text-align: right; display: block;">{options_name}</span>'
+    # Insert options name, and include options cog image if display_cog is True
+    replacement = f'onclick=\'return pycmd("opts:{deck_id}");\'><span style="{styling}">{"<img src=\'/_anki/imgs/gears.svg\' class=gears>" if display_cog else ""}{options_name}</span>'
     return re.sub(pattern, replacement, tree)
 
 
@@ -35,16 +88,17 @@ def reorder_table_columns(html_content: str) -> str:
                 header_cells = header_row.find_all(['th', 'td'])
 
                 if len(header_cells) >= 5:
-                    # Move the last header cell (Options) to the first position
+                    # Move the last header cell (Options) to column_number
                     options_header = header_cells[-1]
                     options_header_copy = options_header.extract()
 
                     # Add title "Preset" to the options header with right alignment and padding
-                    options_header_copy.string = "Preset"
-                    options_header_copy['align'] = 'right'
-                    options_header_copy['style'] = 'text-align: right; padding: 4px 12px;'
+                    options_header_copy.string = preset_header_title
+                    options_header_copy['align'] = preset_header_align
+                    options_header_copy['style'] = preset_header_style
 
-                    header_row.insert(0, options_header_copy)
+                    # TODO doesn't work past 4 because Due gets inserted later?
+                    header_row.insert(column_number, options_header_copy)
 
             # Process data rows (skip header row)
             for row in table_rows[1:]:  # Skip header row
@@ -53,10 +107,10 @@ def reorder_table_columns(html_content: str) -> str:
                 if len(cells) < 4:
                     continue
 
-                # Move last cell to first position
+                # Move last cell to column_number
                 options_cell = cells[-1]
                 options_cell_copy = options_cell.extract()
-                row.insert(0, options_cell_copy)
+                row.insert(column_number, options_cell_copy)
 
             return str(soup)
 
@@ -83,9 +137,6 @@ def replace_home_decks_options_buttons(browser, content) -> None:
             # For filtered decks, get the search terms
             if (terms:= deck_config.get("terms", [])):
                 options_name = f"Filtered: {terms[0][0]}"  # First term's search string
-                if len(options_name) > 60:
-                    # Limit filtered deck's displayed preset name to 60 chars of search string
-                    options_name = f"{options_name[:45]}... (truncated)"
             else:
                 options_name = "Filtered Deck"
         else:
