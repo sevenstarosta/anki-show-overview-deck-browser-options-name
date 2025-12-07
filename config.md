@@ -30,10 +30,10 @@ Displays preset as 5th column, uses the preset cog image, and applies default st
 }
 ```
 
-### Preset as second column after deck name
+### Preset as leftmost column
 Fields not provided in the JSON config for this add-on will revert to their default values. Column is zero-indexed (first column = 0).
 ```json
 {
-    "presetColumnNumber": 1
+    "presetColumnNumber": 0
 }
 ```
